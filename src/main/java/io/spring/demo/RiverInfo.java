@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -29,22 +30,23 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class RiverInfo {
 
-//	@Retryable(
-//			value = {UnknownHostException.class, Exception.class},
-//			maxAttempts = 3,
-//			backoff = @Backoff(delay = 1000))
-	public void retryService() throws Exception {
+	@Retryable (
+			value = {UnknownHostException.class, IllegalStateException.class},
+			maxAttempts = 5,
+			backoff = @Backoff(delay = 5000)
+	)
+	public void retryService()  {
 		HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
 		System.out.println("Retrieving River Data...");
 		httpRequestFactory.setReadTimeout(1000);
 		RestTemplate restTemplate = new RestTemplate(httpRequestFactory);
 		String result = restTemplate.getForObject("https://waterservices.usgs.gov/nwis/stat/?format=rdb&sites=02335757&statReportType=daily&statTypeCd=all", String.class);
 		System.out.println(result);
-//		throw new Exception("ugh");
+//		throw new IllegalStateException("ugh");
 	}
 
 	@Recover
-	public void recover(Exception exception) {
+	public void recover(Exception e) {
 		System.out.println("Probably a raging river of death.  Stay home and work on your Reactive talk");
 	}
 }

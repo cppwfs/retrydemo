@@ -23,7 +23,7 @@ import org.springframework.retry.annotation.EnableRetry;
 
 
 @Configuration
-//@EnableRetry
+@EnableRetry
 public class RiverConfiguration {
 
 	@Bean
